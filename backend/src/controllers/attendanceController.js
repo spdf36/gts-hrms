@@ -5,6 +5,37 @@ const getTodayDate = () => new Date().toISOString().split('T')[0];
 
 // @desc    Clock In
 // @route   POST /api/attendance/clock-in
+
+const getAttendanceByUser = async (req, res) => {
+    try {
+        const history = await Attendance.find({ userId: req.params.id }).sort({ date: -1 });
+        res.json(history);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const getAllAttendance = async (req, res) => {
+    try {
+        const { date } = req.query;
+        let query = {};
+        
+        // If a date is sent (e.g., ?date=2026-02-02), filter by it. 
+        // Otherwise, return everything (or last 30 days to be safe).
+        if (date) {
+            query.date = date;
+        }
+
+        const history = await Attendance.find(query)
+            .populate('userId', 'name email') // Get the Employee Name
+            .sort({ date: -1 }); // Newest first
+        
+        res.json(history);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 const clockIn = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -78,3 +109,21 @@ const getTodayStatus = async (req, res) => {
 };
 
 module.exports = { clockIn, clockOut, getTodayStatus };
+
+// @desc    Get my attendance history
+// @route   GET /api/attendance/me
+const getMyAttendance = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        
+        // Find all records for this user, sorted by newest first
+        const history = await Attendance.find({ userId }).sort({ date: -1 });
+        
+        res.json(history);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Update exports
+module.exports = { clockIn, clockOut, getTodayStatus, getMyAttendance, getAllAttendance, getAttendanceByUser };

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import { Plus, RefreshCw, Trash2, Shield } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 
 const AdminUserList = () => {
     const { user } = useAuth();
@@ -36,7 +36,7 @@ const AdminUserList = () => {
             await axios.post('http://localhost:5000/api/users', formData, config);
             toast.success('User Created Successfully');
             setShowModal(false);
-            fetchUsers();
+            fetchUsers(); // Refresh the list
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed');
         }
@@ -52,6 +52,19 @@ const AdminUserList = () => {
             toast.success('Password Reset Successfully');
         } catch (error) {
             toast.error('Failed to reset password');
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm('Are you sure you want to delete this user? This cannot be undone.')) {
+            try {
+                const config = { headers: { Authorization: `Bearer ${user.token}` } };
+                await axios.delete(`http://localhost:5000/api/users/${id}`, config);
+                toast.success('User Deleted');
+                fetchUsers(); // Refresh the list
+            } catch (error) {
+                toast.error('Failed to delete user');
+            }
         }
     };
 
@@ -90,10 +103,18 @@ const AdminUserList = () => {
                                 <td className="p-4 text-right space-x-2">
                                     <button 
                                         onClick={() => handleResetPassword(u._id)}
-                                        className="text-gts-accent hover:text-gts-primary text-sm font-medium"
+                                        className="text-gts-accent hover:text-gts-primary text-sm font-medium mr-2"
                                         title="Reset Password"
                                     >
                                         Reset Pass
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={() => handleDelete(u._id)}
+                                        className="text-red-400 hover:text-red-600 transition-colors"
+                                        title="Delete User"
+                                    >
+                                        <Trash2 size={18} />
                                     </button>
                                 </td>
                             </tr>

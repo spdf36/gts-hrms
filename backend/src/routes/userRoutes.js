@@ -1,18 +1,33 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, authUser } = require('../controllers/authController');
-const { createUser, resetPassword, getUsers } = require('../controllers/adminController'); // Import new controller
-const { protect, admin } = require('../middleware/authMiddleware'); // Import middleware
 
-// Public Routes
+// Import Controllers
+const { authUser } = require('../controllers/authController');
+const { 
+    createUser, 
+    getUsers, 
+    resetPassword, 
+    deleteUser 
+} = require('../controllers/adminController');
+
+// Import Middleware
+const { protect, admin } = require('../middleware/authMiddleware');
+
+// --- PUBLIC ROUTES ---
 router.post('/login', authUser);
-// router.post('/register', registerUser); // We can disable public registration now if you want
+// router.post('/register', registerUser); // Disabled: Only Admins create users now
 
-// Admin Protected Routes
+// --- ADMIN ROUTES ---
+
+// 1. User Management (Create & List)
 router.route('/')
-    .post(protect, admin, createUser)   // Create new employee
-    .get(protect, admin, getUsers);     // List all users
+    .post(protect, admin, createUser)   // Create new user + employee profile
+    .get(protect, admin, getUsers);     // Get all users
 
-router.put('/:id/password', protect, admin, resetPassword); // Reset Password
+// 2. Specific User Operations (Delete & Reset Password)
+router.route('/:id')
+    .delete(protect, admin, deleteUser); // Delete user
+
+router.put('/:id/password', protect, admin, resetPassword); // Reset password
 
 module.exports = router;

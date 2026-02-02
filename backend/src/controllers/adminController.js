@@ -70,3 +70,28 @@ const getUsers = async (req, res) => {
 };
 
 module.exports = { createUser, resetPassword, getUsers };
+
+// @desc    Delete User and their Employee Profile
+// @route   DELETE /api/users/:id
+const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (user) {
+            // 1. Delete the linked Employee Profile first
+            await Employee.findOneAndDelete({ userId: user._id });
+            
+            // 2. Delete the User Login
+            await User.deleteOne({ _id: user._id });
+
+            res.json({ message: 'User and Profile removed' });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Update the exports at the bottom
+module.exports = { createUser, resetPassword, getUsers, deleteUser };

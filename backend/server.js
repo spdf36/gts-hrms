@@ -7,6 +7,8 @@ const connectDB = require('./src/config/db');
 const userRoutes = require('./src/routes/userRoutes'); 
 const employeeRoutes = require('./src/routes/employeeRoutes');
 const attendanceRoutes = require('./src/routes/attendanceRoutes');
+const leaveRoutes = require('./src/routes/leaveRoutes');
+const holidayRoutes = require('./src/routes/holidayRoutes');
 
 dotenv.config();
 connectDB();
@@ -19,6 +21,8 @@ app.use(express.json());
 app.use('/api/users', userRoutes); 
 app.use('/api/employees', employeeRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/leaves', leaveRoutes);
+app.use('/api/holidays', holidayRoutes);
 
 app.get('/', (req, res) => {
     res.send('GTS HRMS API is running...');
